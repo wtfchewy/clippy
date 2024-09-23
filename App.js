@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Text, View, StyleSheet, Button, Pressable } from "react-native";
+import { Text, View, Button, Pressable, ScrollView } from "react-native";
 import { CameraView, Camera } from "expo-camera";
 import { Barcode } from 'expo-barcode-generator';
-import { faBarcode, faCamera } from "@fortawesome/free-solid-svg-icons";
+import { faClose, faPlus } from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome'
 
 export default function App() {
@@ -28,6 +28,7 @@ export default function App() {
       await AsyncStorage.setItem('@codes', JSON.stringify(updatedCodes));
       setCodes(updatedCodes);
     } catch (e) {
+      console.log("Error storing code", e);
     }
   };
 
@@ -50,8 +51,9 @@ export default function App() {
   }, []);
 
   const handleBarcodeScanned = ({ type, data }) => {
+    const parts = type.split('.');
+    storeCode(data, parts[parts.length - 1]);
     setScanning(false);
-    storeCode(data, type);
   };
 
   if (hasPermission === null) {
@@ -62,42 +64,47 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
+    <View>
       {scanning ? 
-      <CameraView
-      onBarcodeScanned={handleBarcodeScanned}
-      barcodeScannerSettings={{
-        barcodeTypes: ["qr", "pdf417", "aztec", "ean13", "ean8", "upc_e", "datamatrix", "code39", "code93", "code128", "itf", "codabar", "upc_a"],
-      }}
-      style={StyleSheet.absoluteFillObject}
-    />
+      <View className='h-full flex flex-col'>
+        <View className='flex flex-row items-center justify-between mb-2 mt-14 px-7'>
+          <Text className="text-black font-bold text-3xl">Scan a Barcode</Text>
+          <Pressable onPress={() => setScanning(false)}>
+            <FontAwesomeIcon size={28} icon={faClose}/>
+          </Pressable>
+        </View>
+        <CameraView
+        className="w-full h-full"
+        onBarcodeScanned={handleBarcodeScanned}
+        barcodeScannerSettings={{ barcodeTypes: ["qr", "pdf417", "aztec", "ean13", "ean8", "upc_e", "datamatrix", "code39", "code93", "code128", "itf", "codabar", "upc_a"] }}
+        />
+    </View>
     : 
-    <View className="bg-white w-full h-full">
-      <Text className="mt-28 mx-10 text-black font-black text-4xl">Barcodes</Text>
+    <View className="bg-zinc-100 w-full h-full">
+      <Text className="mt-24 mx-7 text-black font-black text-4xl">Barcodes</Text>
       {codes.length === 0 ? (
-          <Text>No codes scanned yet</Text>
+          <Text className="mt-10 mx-10">No codes scanned yet</Text>
         ) : (
-          <View className="mt-10 mx-10 flex">
+          <ScrollView className="pt-5 px-5 flex gap-2">
             {codes.map((code, index) => (
-              <Text key={index}>{code.type}: {code.code}</Text>
+              <View key={index} className="bg-white rounded-lg p-2 flex justify-center items-center">
+                <Barcode
+                  value={code.code}
+                  options={{ background: '' }}
+                  type={code.type}
+                />
+              </View>
             ))}
-          </View>
+          </ScrollView>
       )}
-      <View className="absolute bottom-10 flex flex-row px-6 w-full justify-between items-center">
+      <View className="absolute bottom-10 flex flex-row px-7 w-full justify-between items-center">
         <Pressable onPress={() => setScanning(true)}> 
-          <FontAwesomeIcon size={30} icon={faCamera}/>
+          <FontAwesomeIcon size={30} icon={faPlus}/>
         </Pressable>
+        <Button title="Clear Codes" onPress={() => AsyncStorage.setItem('@codes', '')}/>
       </View>
     </View>
   }
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-  },
-});
