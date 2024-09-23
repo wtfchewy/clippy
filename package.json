@@ -1,5 +1,5 @@
 {
-  "name": "codeclip",
+  "name": "clippy",
   "version": "1.0.0",
   "main": "expo/AppEntry.js",
   "scripts": {
@@ -9,10 +9,17 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/react-native-fontawesome": "^0.3.2",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "expo": "~51.0.28",
+    "expo-barcode-generator": "^3.0.2",
+    "expo-camera": "~15.0.16",
     "expo-status-bar": "~1.12.1",
+    "nativewind": "^2.0.11",
     "react": "18.2.0",
-    "react-native": "0.74.5"
+    "react-native": "0.74.5",
+    "tailwindcss": "3.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
